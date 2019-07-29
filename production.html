@@ -20,8 +20,20 @@
     }
 
     .axis {
-        font-size: 12px;
+        font-size: 1em;
     }
+
+  .bar {
+  fill: #ffab00;
+  }
+
+  .bar:hover {
+  fill: #1e7ea8;
+  }
+
+  .axis--x path {
+  display: none;
+  }
 
   .btn-group,
   .query-params,
@@ -101,11 +113,11 @@
     border-top: none;
     animation: fadeEffect 1s; /* Fading effect takes 1 second */
 }
-    #tooltip {
-        background-color: #dedede;
-        font-size: 1.5em;
-        padding: 10px;
-    }
+
+  #tooltip {
+    background-color: #dedede;
+    font-size: 1.5em;
+  }
 
 </style>        
     <body>
@@ -113,20 +125,19 @@
 
         <!-- Clicking Tabs-->
         <div class="tab">
-            <button class="tablinks" onclick="window.location.href = 'index.html';">TIMELINE</button>
-            <button class="tablinks" onclick="window.location.href = 'production.html';">COFFEE CONSUMPTION</button>
+          <button class="tablinks" onclick="window.location.href = 'index.html';">TIMELINE</button>
+          <button class="tablinks" onclick="window.location.href = 'production.html';">COFFEE PRODUCTION</button>
       </div>
 
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+      <script src="https://d3js.org/d3.v4.min.js"></script>
 
     <!-- Chart Tabs-->
-  <svg></svg>
-    <div id = "timeline" class = "tabcontent"></div>
+    <div id = "production" class = "tabcontent"></div>
   <!-- Timeline -->
-      <script>
+<!--       <script>
       // Create horizontal line with dots
-        d3.select("#consumption").html = "";
+      const timelineChart = () => { 
+        d3.select("#production").html = "";
         d3.select("#timeline").html="";
       var cHistory = [{year: 1475, txt: "First coffee shop, Kiva Han, opens in Constantinople"},
                       {year: 1511, txt: "Coffee houses are banned in Mecca"},
@@ -146,7 +157,7 @@
 
 
   var margin = {top: 50, right: 100, bottom: 50, left: 100}
-    , width = window.innerWidth - margin.left - margin.right-200 // Use the window's width 
+    , width = window.innerWidth - margin.left - margin.right // Use the window's width 
     , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
 
 
@@ -272,80 +283,128 @@
         .style("fill", "#ffab00")
         .style("opacity", 1.0)
         .delay( function(d,i) {return (i * 10);});
+      }
+      </script> -->
 
-      </script>
-
-  <!-- consumption -->
-  <!--   <script>
-        const prepBarChart = () => {
-        d3.select("#consumption").html = "";
+  <!-- production -->
+    <script>
+        d3.select("#production").html = "";
         d3.select("#timeline").html="";
-        var svg = d3.select('body').append('svg');
 
-        var margin = {top: 50, right: 100, bottom: 50, left: 100}
-        , width = window.innerWidth - margin.left - margin.right // Use the window's width 
-        , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
+    var tooltip = d3.select("body")
+    .append("div")
+      .attr("id", "tooltip")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden")
+      .text("Some tooltip");
+
+
+  // Three function that change the tooltip when user hover / move / leave a cell
+  var mouseover = function(d) {
+    tooltip
+      .style("opacity", 0.80)
+    d3.select(this)
+      .style("stroke", "black")
+      .style("opacity", 1)
+      .style("fill", "#349eeb")
+      d3.select("#tooltip")
+          .style("visibility", "visible")
+          .style("fill", "#e0dede")
+          .style("stroke", "black")
+          .html("<strong>Country:</strong>" + d.country);
+  }
+  var mousemove = function(d) {
+    tooltip
+      .html("<span style = 'color:#1e7ea8'><strong>Country: " + d.country + "</span><br>" + d3.format("(,.4r")(d.tons)  + " metric tons produced") 
+      .style("fill", "#e0dede")
+      .style("stroke", "black")
+      .style("left", d3.event.pageX - 100+ "px")     
+      .style("top", d3.event.pageY - 200 +"px"); 
+  }
+  var mouseleave = function(d) {
+    tooltip
+      .style("opacity", 0)
+    d3.select(this)
+      .style("stroke", "none")
+      .style("opacity", 1)
+      .style("fill", "#ffab00")
+      .attr('r', 10)
+  }
+
+        var margin = {top: 100, right: 100, bottom: 50, left: 100}
+        , width = window.innerWidth - margin.left - margin.right -100// Use the window's width 
+        , height = window.innerHeight - margin.top - margin.bottom - 100; // Use the window's height
+
+        var svg = d3.select('body').append('svg').attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom);
 
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         var x = d3.scaleBand()
+            .domain([1,2,3,4,5,6,7,8,9, 10])
             .rangeRound([0, width])
             .padding(0.1);
 
         var y = d3.scaleLinear()
+            .domain([0,3000000])
             .rangeRound([height, 0]);
 
-        dataset = [{country: "Guatemala", tons: 204000},
-                    {country: "Mexico", tons: 234000},
-                    {country: "Uganda", tons: 288000},
-                    {country: "India", tons: 348000},
-                    {country: "Honduras", tons: 348000},
-                    {country: "Ethiopia", tons: 384000},
-                    {country: "Indonesia", tons: 660000},
-                    {country: "Colombia", tons: 810000},
-                    {country: "Vietnam", tons: 1650000},
-                    {country: "Brazil", tons: 2595000}]
+        var xlabels = ["Guatemala", "Mexico", "Uganda", "India", "Honduras", "Ethiopia", "Indonesia", "Colombia", "Vietnam", "Brazil"]
 
-        x.domain([0, 9]);
-        y.domain([0, 3000000]);
-        
-    g.append("g")
+        dataset = [{rank: 1, country: "Guatemala", tons: 204000},
+                    {rank: 2, country: "Mexico", tons: 234000},
+                    {rank: 3, country: "Uganda", tons: 288000},
+                    {rank: 4, country: "India", tons: 348000},
+                    {rank: 5, country: "Honduras", tons: 348000},
+                    {rank: 6, country: "Ethiopia", tons: 384000},
+                    {rank: 7, country: "Indonesia", tons: 660000},
+                    {rank: 8, country: "Colombia", tons: 810000},
+                    {rank: 9, country: "Vietnam", tons: 1650000},
+                    {rank: 10, country: "Brazil", tons: 2595000}]
+
+
+      g.append("g")
+        .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x))
+        .call(d3.axisBottom(x).tickFormat(function (d,i) {
+          return xlabels[i];
+        }));
 
-	g.append("g")
-        .call(d3.axisLeft(y))
-        .append("text")
-            .attr("fill", "#000")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", "0.71em")
-            .attr("text-anchor", "end")
-            .text("Coffee Production in Tons");
+    g.append("g")
+      	.attr("class", "axis axis--y")
+        .call(d3.axisLeft(y).ticks(5))
+      	//.call(d3.axisLeft(y).ticks(5).tickFormat(function(d) { return parseInt(d / 1000) + "K"; }).tickSizeInner([-width]))
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", "0.71em")
+        .attr("text-anchor", "end")
+        .attr("fill", "#5D6971")
+        .text("Production in Tons");
 
-	g.selectAll(".bar")
-	.data(dataset)
-	.enter().append("rect")
-	.attr("class", "bar")
-	.attr("x", function (d,i) {
-		return x(i);
-	})
-	.attr("y", function (d) {
-		return y(Number(d.tons));
-	})
-	.attr("width", x.bandwidth())
-	.attr("height", function (d) {
-		return height - y(Number(d.tons));
-	});
-        }
-    </script> -->
-  <!-- Tab Display -->
+    g.selectAll(".bar")
+      	.data(dataset)
+      .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function (d, i) {return x(d.rank);})
+        .attr("y", function(d) { return y(d.tons); })
+        .attr("width", x.bandwidth())
+        .attr("height", function(d) { return height - y(d.tons); })
+        .attr("fill", "#ffab00")
+        .on("mouseover", mouseover)
+      .on("mousemove", mousemove)
+      .on("mouseleave", mouseleave);
+
+
+    </script>
+<!--
   <script type ="text/javascript">
     let activeChart = 'timeline';
     function displayChart(evt, a_call) {
         // clear all charts
-        d3.select("#consumption").selectAll("svg").remove();
+        d3.select("#production").selectAll("svg").remove();
         d3.select("#timeline").selectAll("svg").remove();
-        d3.select("#consumption").html = "";
+        d3.select("#production").html = "";
         d3.select("#timeline").html="";
         activeChart = a_call;
         a_call === 'timeline' ? timelineChart() : prepBarChart();
@@ -369,5 +428,5 @@
     }
     </script>
     </body>
-
+ -->
 </html>
