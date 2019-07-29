@@ -1,1 +1,305 @@
-Hello World
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style type="text/css">
+    h1 {
+            font-family: sans-serif;
+            font-size: 2em;
+        }
+
+    .line {
+        fill: none;
+        stroke: #ffab00;
+        stroke-width: 3;
+    }
+    body {
+      font-family: sans-serif;
+      font-size: 1em;
+    }
+    .dot {    
+        stroke: #fff;
+    }
+
+  .btn-group,
+  .query-params,
+  #text-box {
+    margin: 20px;
+    font-family: sans-serif;
+  } 
+  
+  .btn {
+  background-color: #29abe2;
+  color: white;
+  font: 16px sans-serif;
+  width: 300px;
+  padding: 8px 32px;
+  margin-left: 20px;
+}
+
+.btn:hover {
+  background-color: #1e7ea8;
+}
+
+.btn-group button {
+    background-color: #4CAF50;
+    border: 1px solid green;
+    color: white;
+    padding: 10px 24px;
+    cursor: pointer;
+    width: 400px;
+    text-align: left;
+    display: block;
+    margin-top: 5px;
+}
+
+.btn-group button:not(:last-child) {
+    border-bottom: none;
+}
+
+.btn-group button:hover {
+    background-color: #3e8e41;
+}
+/* Tab styles */
+.tab {
+    padding-left: 20px;
+    background-color: #fff;
+
+  }
+
+  /* Style the buttons that are used to open the tab content */
+  .tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 16px;
+  }
+
+  /* Change background color of buttons on hover */
+  .tab button:hover {
+    background-color: #29abe2;
+    color: white;
+  }
+
+  /* Create an active/current tablink class */
+  .tab button.active {
+    background-color: #29abe2;
+    color: white;
+  }
+
+  /* Style the tab content */
+  .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+    animation: fadeEffect 1s; /* Fading effect takes 1 second */
+}
+
+/* Go from zero to full opacity */
+@keyframes fadeEffect {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+</style>        
+    <body>
+        <h1>A Short History of Coffee</h1>
+
+        <!-- Clicking Tabs-->
+        <div class="tab">
+          <button class="tablinks" onclick="displayChart(event, 'timeline')">TIMELINE</button>
+          <button class="tablinks" onclick="displayChart(event, 'consumer-bd')">CONSUMER BREAKDOWN</button>
+      </div>
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+    <!-- Chart Tabs-->
+  
+    <div id = "timeline" class = "tabcontent"></div>
+    <div id = "process" class = "tabcontent"></div>
+  <!-- Timeline -->
+      <script>
+      // Create horizontal line with dots
+      const prepAnnualSpendingLineChart = () => { 
+      var cHistory = [{year: 1475, txt: "First coffee shop, Kiva Han, opens in Constantinople"},
+                      {year: 1511, txt: "Coffee houses are banned in Mecca"},
+                      {year: 1532, txt: "Coffee houses are banned in Cairo"},
+                      {year: 1645, txt: "The first coffee house opens in Venice"},
+                      {year: 1652, txt: "The first coffee house opens in London"},
+                      {year: 1685, txt: "The first coffee house opens in Vienna"},
+                      {year: 1773, txt: "The Boston Tea Party happens and coffee became a patriotic drink in the United States"},
+                      {year: 1890, txt: "David Strang in New Zealand invents instant coffee"},
+                      {year: 1901, txt: "Luigi Bezzera patents his espresso machine"},
+                      {year: 1945, txt: "Achille Gaggia claims and introduces espresso brewing using high pressure (espesso as we know now)"},
+                      {year: 1950, txt: "Beginning of the espresso bar boom"},
+                      {year: 1966, txt: "Peet's Coffee opens its first store in Berkeley, California"},
+                      {year: 2019, txt: "Coffee is one of the world's most popular beverages with more than 500 billion cups consumed each year"}
+                      ]
+
+
+
+  var margin = {top: 50, right: 50, bottom: 50, left: 50}
+    , width = window.innerWidth - margin.left - margin.right // Use the window's width 
+    , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
+
+
+  // The number of datapoints
+  var n = 13;
+
+  // 5. X scale will use the index of our data
+  var xScale = d3.scaleLinear()
+      .domain([1470, 2019]) // input
+      .range([0, width]); // output
+
+  // 6. Y scale will use the randomly generate number 
+  var yScale = d3.scaleLinear()
+      .domain([0, 0]) // input 
+      .range([height / 2, 0]); // output 
+
+  // 7. d3's line generator
+  var line = d3.line()
+      .x(function(d, i) { return xScale(d.year); }) // set the x values for the line generator
+      .y(yScale(0)) // set the y values for the line generator 
+      .curve(d3.curveMonotoneX) // apply smoothing to the line
+
+  // 8. An array of objects of length N. Each object has key -> value pair, the key being "y" and the value is a random number
+  var dataset = cHistory;
+
+  // 1. Add the SVG to the page and employ #2
+  var svg = d3.select("body").append("svg")
+      .data(dataset)
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  // 3. Call the x axis in a group tag
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + (height / 3.75) + ")")
+      .call(d3.axisBottom(xScale).tickValues([1475, 1511, 1532, 1645, 1652, 1685, 1773, 1890, 1901, 1945, 1950, 1966, 2019]).tickFormat(d3.format("d"))); // Create an axis component with d3.axisBottom
+
+  // 4. Call the y axis in a group tag
+  /*
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+  */
+
+
+  // 9. Append the path, bind the data, and call the line generator 
+  svg.append("path")
+      .datum(dataset) // 10. Binds data to the line 
+      .attr("class", "line") // Assign a class for styling 
+      .attr("d", line) // 11. Calls the line generator 
+      .transition()
+        .duration(4000);
+        //.attrTween('d', pathTween);
+
+  function pathTween() {
+      var interpolate = d3.scaleQuantile()
+              .domain([0,1])
+              .range(d3.range(1, dataset.length + 1));
+      return function(t) {
+          return line(dataset.slice(0, interpolate(t)));
+      };}
+
+
+  var tooltip = d3.select("body")
+      .append("div")
+      .attr("id", "mytooltip")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden");
+
+
+  // Three function that change the tooltip when user hover / move / leave a cell
+  var mouseover = function(d) {
+    tooltip
+      .style("opacity", 1)
+    d3.select(this)
+      .style("stroke", "black")
+      .style("opacity", 1)
+      .style("fill", "#349eeb")
+      .attr('r', 15);
+      d3.select("#mytooltip")
+          .style("visibility", "visible")
+          .style("fill", "#e0dede")
+          .style("stroke", "black")
+          .html("<strong>Year:</strong>" + d.year);
+  }
+  var mousemove = function(d) {
+    tooltip
+      .html("<span style = 'color:blue'><strong>Year: " + d.year + "</strong></span><p>" + d.txt + "<p>")
+      .style("fill", "#e0dede")
+      .style("stroke", "black")
+      .style("left", d3.select(this).attr("cx") + "px")     
+      .style("top", d3.select(this).attr("cy") + "px"); 
+  }
+  var mouseleave = function(d) {
+    tooltip
+      .style("opacity", 0)
+    d3.select(this)
+      .style("stroke", "none")
+      .style("opacity", 0.8)
+      .style("fill", "#ffab00")
+      .attr('r', 10)
+  }
+
+
+  // 12. Appends a circle for each datapoint 
+  let dots = svg.selectAll(".dot");
+  dots.data(dataset)
+      .enter().append("circle") // Uses the enter().append() method
+      .attr("class", "dot") // Assign a class for styling
+      .attr("cx", function(d) { return xScale(d.year);})
+      .attr("cy", yScale(0))
+      .attr("r", 10)
+      .style("fill", "none")
+      .style("opacity", 0)
+      .on("mouseover", mouseover)
+      .on("mousemove", mousemove)
+      .on("mouseleave", mouseleave)
+      .transition()
+        .duration(3000)
+        .style("fill", "#ffab00")
+        .style("opacity", 1.0)
+        .delay( function(d,i) {return (i * 10);});
+      }
+      </script>
+
+  <!-- Ti-->
+  <!-- Tab Display -->
+  <script type ="text/javascript">
+    let activeChart = 'timeline';
+    function displayChart(evt, a_call) {
+        // clear all charts
+        d3.select("#consumer-bd").selectAll("svg").remove();
+        d3.select("#timeline").selectAll("svg").remove();
+        activeChart = a_call;
+        a_call === 'timeline' ? prepAnnualSpendingLineChart() : prepBarChart();
+        // Declare all variables
+        var i, tabcontent, tablinks;
+        // Get all elements with class="tabcontent" and hide them
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        // Get all elements with class="tablinks" and remove the class "active"
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        document.getElementById(a_call).style.display = "block";
+        if (evt) {
+            evt.currentTarget.className += " active";
+        }
+    }
+    </script>
+    </body>
+
+</html>
