@@ -35,6 +35,14 @@
   display: none;
   }
 
+  .svg text {
+	fill: black;
+	font-family: sans-serif;
+  font-size: 16px;
+	font-weight: bold;
+	text-align: center;
+}
+
   .btn-group,
   .query-params,
   #text-box {
@@ -117,6 +125,7 @@
   #tooltip {
     background-color: #dedede;
     font-size: 1.5em;
+    padding: 10px;
   }
 
 </style>        
@@ -125,8 +134,9 @@
 
         <!-- Clicking Tabs-->
         <div class="tab">
-          <button class="tablinks" onclick="window.location.href = 'index.html';">TIMELINE</button>
-          <button class="tablinks" onclick="window.location.href = 'production.html';">COFFEE PRODUCTION</button>
+            <button class="tablinks" onclick="window.location.href = 'index.html';">1 HISTORY OF COFFEE DRINKING</button>
+            <button class="tablinks" onclick="window.location.href = 'production.html';">2 TOP COFFEE PRODUCERS</button>
+            <button class="tablinks" onclick="window.location.href = 'production-year.html';">3 COFFEE PROODUCTION</button>
       </div>
 
       <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -333,11 +343,12 @@
   }
 
         var margin = {top: 100, right: 100, bottom: 50, left: 100}
-        , width = window.innerWidth - margin.left - margin.right -100// Use the window's width 
-        , height = window.innerHeight - margin.top - margin.bottom - 100; // Use the window's height
+        , width = window.innerWidth - margin.left - margin.right -200// Use the window's width 
+        , height = window.innerHeight - margin.top - margin.bottom - 200; // Use the window's height
 
         var svg = d3.select('body').append('svg').attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom);
+
 
         g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
         var x = d3.scaleBand()
@@ -382,6 +393,13 @@
         .attr("fill", "#5D6971")
         .text("Production in Tons");
 
+    svg.append("text")
+        .attr("x", width /2)
+        .attr("y", margin.top - 50)
+        .attr("text-anchor", "middle")
+        .style("font-size", "2em")
+        .text("Top 10 Coffee Producers in 2016");
+
     g.selectAll(".bar")
       	.data(dataset)
       .enter().append("rect")
@@ -389,44 +407,14 @@
         .attr("x", function (d, i) {return x(d.rank);})
         .attr("y", function(d) { return y(d.tons); })
         .attr("width", x.bandwidth())
-        .attr("height", function(d) { return height - y(d.tons); })
-        .attr("fill", "#ffab00")
         .on("mouseover", mouseover)
-      .on("mousemove", mousemove)
-      .on("mouseleave", mouseleave);
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave)
+        .transition()
+          .duration(2000)
+        .attr("height", function(d) { return height - y(d.tons); })
+        .attr("fill", "#ffab00");
 
 
     </script>
-<!--
-  <script type ="text/javascript">
-    let activeChart = 'timeline';
-    function displayChart(evt, a_call) {
-        // clear all charts
-        d3.select("#production").selectAll("svg").remove();
-        d3.select("#timeline").selectAll("svg").remove();
-        d3.select("#production").html = "";
-        d3.select("#timeline").html="";
-        activeChart = a_call;
-        a_call === 'timeline' ? timelineChart() : prepBarChart();
-        // Declare all variables
-        var i, tabcontent, tablinks;
-        // Get all elements with class="tabcontent" and hide them
-        tabcontent = document.getElementsByClassName("tabcontent");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-        // Get all elements with class="tablinks" and remove the class "active"
-        tablinks = document.getElementsByClassName("tablinks");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
-        }
-        // Show the current tab, and add an "active" class to the button that opened the tab
-        document.getElementById(a_call).style.display = "block";
-        if (evt) {
-            evt.currentTarget.className += " active";
-        }
-    }
-    </script>
-    </body>
- -->
 </html>
