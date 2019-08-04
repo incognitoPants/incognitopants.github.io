@@ -150,7 +150,7 @@
   
         <h1>Pokémon</h1>
         <div id = "text">
-            <p>Pokémon, short for Pocket Monsters, has over 700 different types. When deciding who to pick for your team, it's best to look at
+            <p>Pokémon, short for Pocket Monsters, has over 700 kinds types. When deciding who to pick for your team, it's best to look at
               the different attributes to construct the best party.
             </p>
             </div>
@@ -163,7 +163,7 @@
 
 
     <!-- Chart Tabs-->
-      
+    <div id = "title" style = "padding-top: 20px;"><h2>Top Pokémon for Each Attribute</h2></div>
     <svg width=600 height=600></svg>
   <!-- Chart -->
   <script src='https://d3js.org/d3.v5.min.js'></script>
@@ -288,6 +288,27 @@
           .attr("class", "x-axis")
           .attr("transform", "translate(70,550)")
           .call(d3.axisBottom(x).ticks(6).tickFormat(function (d, i) { return xlabels[i];}));
+
+
+        /* Legend */
+        var legend = svg.selectAll(".legend").data(colors).enter()
+        .append("g").attr("class", "legend")
+        .attr("transform",  function(d, i) { return "translate(50," + i * 20 + ")"; });
+
+        legend.append("rect")
+          .attr("x", 525)
+          .attr("width", 18)
+          .attr("height", 18)
+          .style("fill", function(d, i) { return colors[i];});
+
+
+      // draw legend text
+      legend.append("text")
+          .attr("x", 525 - 10)
+          .attr("y", 9)
+          .attr("dy", ".35em")
+          .style("text-anchor", "end")
+          .text(function(d, i) { return xlabels[i];})
 
 
         /* Annotations */
