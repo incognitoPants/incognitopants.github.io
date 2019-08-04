@@ -19,7 +19,8 @@
         stroke: #fff;
     }
 
-  .btn-group,
+
+    .btn-group,
   .query-params,
   #text-box {
     margin: 20px;
@@ -105,6 +106,13 @@
     animation: fadeEffect 1s; /* Fading effect takes 1 second */
   }
   
+/* Line */
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3;
+}
+
  /* Tool Tip */
  #tooltip {
         background-color: #f2f2f2;
@@ -118,8 +126,8 @@
     }
 
 .annotation path {
-      stroke: #c4a443;
-      fill: #c4a443;
+      stroke: #E8336D;
+      fill: none;
     }
      
     .title text, .annotation text{
@@ -141,17 +149,18 @@
     <body>
   
         <h1>Pokémon</h1>
-        <div id = "text">
-            <p>Pokémon, short for Pocket Monsters, has over 700 different types. When deciding who to pick for your team, it's best to look at
-              the different attributes to construct the best party.
-            </p>
-        </div>
+          <div id = "text">
+      <p>Pokémon, short for Pocket Monsters, has over 700 different types. When deciding who to pick for your team, it's best to look at
+        the different attributes to construct the best party.
+      </p>
+      </div>
         <!-- Clicking Tabs for slideshow-->
         <div class="tab">
-          <button class="tablinks" onclick="window.location.href = 'index.html';"> 1</button>
+          <button class="tablinks" onclick="window.location.href = 'index.html';">1</button>
           <button class="tablinks" onclick="window.location.href = 'slide2.html';">2</button>
           <button class="tablinks" onclick="window.location.href = 'slide3.html';">3</button>
       </div>
+    
 
 
     <!-- Chart Tabs-->
@@ -178,19 +187,24 @@
           .style("opacity", 1)
         d3.select(this)
           .style("stroke", "black")
-          .style("opacity", 0.8);
+          .style("opacity", 0.8)
+          .attr("r", 15);
           //.style("fill", "#349eeb");
 
           d3.select("#tooltip")
               .style("visibility", "visible")
               .style("fill", "#e0dede")
               .style("stroke", "black")
-              .html("<strong>Pokémon Type: " + xlabels[i] + "</strong><br><strong>Type: </strong>" + type_count[i]);
+              .html("<strong>Stat: " + xlabels[i] + "</strong><br><strong>Value: </strong>" + top_mon_vals[i]);
           }
 
         var mousemove = function(d, i) {
           tooltip
-            .html("<span style = 'color:#1e7ea8'><strong>Pokemon Type: </strong>" + xlabels[i] + "<br><strong>Count: </strong>" + type_count[i])
+            .html("<span style = 'color:#1e7ea8'><strong>" + xlabels[i] + "</strong>" + 
+            "<br><strong>Total Stat: </strong>" + top_mon_vals[i] +
+            "<br><strong>Name: </strong>" + mon_names[i] +
+            "<br><strong>Type 1: </strong>" + mon_type[i] +
+            "<br><strong>Legendary: </strong>" + mon_leg[i])
             .style("fill", "#e0dede")
             .style("stroke", "black")
             .style("left", (d3.event.pageX + 16) + "px")
@@ -202,42 +216,65 @@
             .style("opacity", 0)
           d3.select(this)
             .style("stroke", "none")
-            .style("opacity", 1);
+            .style("opacity", 1)
+            .attr("r", 10);
             //.style("fill", colors[i]);
         }
 
         /* Chart section */
-        var data = d3.csv("https://incognitopants.github.io/Pokemon.csv", function(err, dataset) {
-          console.log(dataset)
-        });
-        var type_count = [70, 52, 112, 69, 98, 28, 44, 32, 17, 27, 57, 44, 32, 24, 32, 31, 27, 4];
+        var data = d3.csv("https://incognitopants.github.io/Pokemon.csv");
+        var top_mons_id = [150, 248, 384, 493, 646, 719];
+        var top_mon_vals = [780, 700, 780, 720, 700, 700];
+        var mon_names = ["MewtwoMega Mewtwo X", "TyranitarMega Tyranitar", "RayquazaMega Rayquaza", 
+        "Arceus", "KyuremBlack Kyurem", "DiancieMega Diancie"];
+        var mon_type = ["Psychic", "Rock", "Dragon", "Normal", "Dragon", "Rock"];
+        var mon_leg = ["Yes", "No", "Yes", "Yes", "Yes", "Yes"];
+        var points = [[0, 780], [1, 700], [2, 780], [3, 720], [4, 700], [5, 700]];
         var width = 500;
         var height = 500;
         var margin = 50;
-        var colors = ["#7AC74C", "#EE8130","#6390F0","#A6B91A","#A8A77A","#A33EA1","#F7D02C","#E2BF65","#D685AD",
-                      "#C22E28","#F95587","#B6A136","#735797","#96D9D6","#6F35FC","#705746","#B7B7CE","#A98FF3"]
-        var xlabels = ["Grass","Fire", "Water", "Bug", "Normal", "Poison", "Electric", "Ground", 
-                                  "Fairy", "Fighting","Psychic","Rock","Ghost", "Ice", "Dragon", "Dark",
-                                  "Steel", "Flying" ];
+        var colors = ["#7AC74C", "#EE8130","#6390F0","#A6B91A","#A8A77A","#A33EA1"]
+        var xlabels = ["Gen 1", "Gen 2", "Gen 3", "Gen 4", "Gen 5", "Gen 6"];
+        var n = 6; // # of datapoints
 
-        var x = d3.scaleBand().range([0, width]);
-        var y = d3.scaleLinear().range([height, 0]);
+        var x = d3.scaleLinear().domain([0, n-1]).range([0, width]);
+        var y = d3.scaleLinear().domain([650, 800]).range([height, 0]);
 
-        x.domain([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);
-        y.domain([0, d3.max(type_count)]);
+        //x.domain([01,2,3,4,5]);
+        //y.domain([0, 255]); //highest value is 255
+
+        var line = d3.line()
+          .x(function (d, i) { 
+            console.log(x(i));
+            return x(i);})
+          .y(function (d, i) {
+            console.log(top_mon_vals[i]);
+            return y(top_mon_vals[i]);
+          })
+          .curve(d3.curveMonotoneX);
+
+          pathdata = line(top_mon_vals);
 
         var svg = d3.select("svg");
-
-        /* Draw bars */
         svg.append("g")
-            .attr("transform", "translate(50,50)")
-          .selectAll("rect")
-          .data(type_count)
-          .enter().append("rect")
-            .attr("x", function(d,i) { return x(i); })
-            .attr("y", function(d) { return y(d); })
-            .attr("width", x.bandwidth())
-            .attr("height", function(d) { return height - y(d); })
+            .attr("transform", "translate(50,50)");
+        
+        /* Draw line */
+        svg.select("g")
+          .append("path")
+          .datum(top_mon_vals)
+          .attr("class", "line")
+          .attr("fill", "none")
+          .attr("d", line);
+
+        /* data points */
+        svg.selectAll(".dot")
+          .data(top_mon_vals)
+          .enter().append("circle")
+            .attr("class", "dot")
+            .attr("cx", function(d,i) { return x(i) + margin; })
+            .attr("cy", function(d,i) { return y(top_mon_vals[i])+margin; })
+            .attr("r", 10)
             .attr("fill", function(d, i) { return colors[i];})
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
@@ -246,38 +283,49 @@
         /* Axes */
         d3.select("svg").append("g")
           .attr("transform", "translate(50,50)")
-          .call(d3.axisLeft(y));
+          .call(d3.axisLeft(y).ticks(5));
 
         d3.select("svg").append("g")
           .attr("class", "x-axis")
           .attr("transform", "translate(50,550)")
-          .call(d3.axisBottom(x).tickFormat(function (d, i) { return xlabels[i];}))
-          .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 9)
-            .attr("dy", ".35em")
-            .attr("transform", "rotate(90)")
-            .style("text-anchor","start")
+          .call(d3.axisBottom(x).ticks(6).tickFormat(function (d, i) { return xlabels[i];}));
 
+
+
+        /* Legend */
+        var legend = svg.selectAll(".legend").data(colors).enter()
+        .append("g").attr("class", "legend")
+        .attr("transform",  function(d, i) { return "translate(50," + i * 20 + ")"; });
+
+        legend.append("rect")
+          .attr("x", width - 18)
+          .attr("width", 18)
+          .attr("height", 18)
+          .style("fill", function(d, i) { return colors[i];});
+
+
+      // draw legend text
+      legend.append("text")
+          .attr("x", width - 24)
+          .attr("y", 9)
+          .attr("dy", ".35em")
+          .style("text-anchor", "end")
+          .text(function(d, i) { return xlabels[i];})
 
         /* Annotations */
         // Features of the annotation
-        const annotations = [
+         const annotations = [
           {
+            type: d3.annotationCalloutCircle,
             note: {
-              label: "Water types account for 112 of all Pokémon!",
-              title: "Most Common Type 1 Pokémon",
+              label: "All but Tyranitar is a legendary Pokémon, which makes it very impressive in comparison.",
+              title: "Mega Tyranitar",
               wrap: 300
             },
-            connector: {
-              end: "dot",
-              type: "line",
-              endScale: 5
-            },
-            x: 120,
-            y: 50,
-            dy: 100,
-            dx: 100
+            x: 250,
+            y: 116,
+            dy: 300,
+            dx: 0
           }
         ]
 
@@ -287,7 +335,7 @@
         d3.select("svg")
           .append("g")
           .call(makeAnnotations);
-            
+             
       </script>
     </body>
 

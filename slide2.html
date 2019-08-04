@@ -19,7 +19,8 @@
         stroke: #fff;
     }
 
-  .btn-group,
+
+    .btn-group,
   .query-params,
   #text-box {
     margin: 20px;
@@ -105,6 +106,13 @@
     animation: fadeEffect 1s; /* Fading effect takes 1 second */
   }
   
+/* Line */
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3;
+}
+
  /* Tool Tip */
  #tooltip {
         background-color: #f2f2f2;
@@ -145,10 +153,10 @@
             <p>Pokémon, short for Pocket Monsters, has over 700 different types. When deciding who to pick for your team, it's best to look at
               the different attributes to construct the best party.
             </p>
-        </div>
+            </div>
         <!-- Clicking Tabs for slideshow-->
         <div class="tab">
-          <button class="tablinks" onclick="window.location.href = 'index.html';"> 1</button>
+          <button class="tablinks" onclick="window.location.href = 'index.html';">1</button>
           <button class="tablinks" onclick="window.location.href = 'slide2.html';">2</button>
           <button class="tablinks" onclick="window.location.href = 'slide3.html';">3</button>
       </div>
@@ -178,19 +186,24 @@
           .style("opacity", 1)
         d3.select(this)
           .style("stroke", "black")
-          .style("opacity", 0.8);
+          .style("opacity", 0.8)
+          .attr("r", 15);
           //.style("fill", "#349eeb");
 
           d3.select("#tooltip")
               .style("visibility", "visible")
               .style("fill", "#e0dede")
               .style("stroke", "black")
-              .html("<strong>Pokémon Type: " + xlabels[i] + "</strong><br><strong>Type: </strong>" + type_count[i]);
+              .html("<strong>Stat: " + xlabels[i] + "</strong><br><strong>Value: </strong>" + top_mon_vals[i]);
           }
 
         var mousemove = function(d, i) {
           tooltip
-            .html("<span style = 'color:#1e7ea8'><strong>Pokemon Type: </strong>" + xlabels[i] + "<br><strong>Count: </strong>" + type_count[i])
+            .html("<span style = 'color:#1e7ea8'><strong>Stat: </strong>" + xlabels[i] + 
+            "<br><strong>Value: </strong>" + top_mon_vals[i] +
+            "<br><strong>Name: </strong>" + mon_names[i] +
+            "<br><strong>Type 1: </strong>" + mon_type[i] +
+            "<br><strong>Generation: </strong>" + mon_gen[i])
             .style("fill", "#e0dede")
             .style("stroke", "black")
             .style("left", (d3.event.pageX + 16) + "px")
@@ -202,42 +215,65 @@
             .style("opacity", 0)
           d3.select(this)
             .style("stroke", "none")
-            .style("opacity", 1);
+            .style("opacity", 1)
+            .attr("r", 10);
             //.style("fill", colors[i]);
         }
 
         /* Chart section */
-        var data = d3.csv("https://incognitopants.github.io/Pokemon.csv", function(err, dataset) {
-          console.log(dataset)
-        });
-        var type_count = [70, 52, 112, 69, 98, 28, 44, 32, 17, 27, 57, 44, 32, 24, 32, 31, 27, 4];
+        var data = d3.csv("https://incognitopants.github.io/Pokemon.csv");
+        var top_mons_id = [236, 210, 203, 65, 208, 281];
+        var top_mon_vals = [35, 120, 65, 175, 95, 50];
+        var mon_names = ["Tyrogue", "Granbull", "Girafarig", "AlakazamMega Alakazam", "SteelixMega Steelix", "Kirlia"];
+        var mon_type = ["Fighting", "Fairy", "Normal", "Psychic", "Steel", "Psychic"];
+        var mon_gen = [2, 2, 2, 1, 2, 3];
+        var points = [[0, 35], [1, 120], [2, 65], [3, 175], [4, 95], [5, 50]];
         var width = 500;
         var height = 500;
         var margin = 50;
-        var colors = ["#7AC74C", "#EE8130","#6390F0","#A6B91A","#A8A77A","#A33EA1","#F7D02C","#E2BF65","#D685AD",
-                      "#C22E28","#F95587","#B6A136","#735797","#96D9D6","#6F35FC","#705746","#B7B7CE","#A98FF3"]
-        var xlabels = ["Grass","Fire", "Water", "Bug", "Normal", "Poison", "Electric", "Ground", 
-                                  "Fairy", "Fighting","Psychic","Rock","Ghost", "Ice", "Dragon", "Dark",
-                                  "Steel", "Flying" ];
+        var colors = ["#7AC74C", "#EE8130","#6390F0","#A6B91A","#A8A77A","#A33EA1"]
+        var xlabels = ["HP", "Attack", "Defense", "Sp. Attack", "Sp. Defense", "Speed"];
+        var n = 6; // # of datapoints
 
-        var x = d3.scaleBand().range([0, width]);
-        var y = d3.scaleLinear().range([height, 0]);
+        var x = d3.scaleLinear().domain([0, n-1]).range([0, width]);
+        var y = d3.scaleLinear().domain([0, 180]).range([height, 0]);
 
-        x.domain([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);
-        y.domain([0, d3.max(type_count)]);
+        //x.domain([01,2,3,4,5]);
+        //y.domain([0, 255]); //highest value is 255
+
+        var line = d3.line()
+          .x(function (d, i) { 
+            console.log(x(i));
+            return x(i);})
+          .y(function (d, i) {
+            console.log(top_mon_vals[i]);
+            return y(top_mon_vals[i]);
+          })
+          .curve(d3.curveMonotoneX);
+
+          pathdata = line(top_mon_vals);
 
         var svg = d3.select("svg");
-
-        /* Draw bars */
         svg.append("g")
-            .attr("transform", "translate(50,50)")
-          .selectAll("rect")
-          .data(type_count)
-          .enter().append("rect")
-            .attr("x", function(d,i) { return x(i); })
-            .attr("y", function(d) { return y(d); })
-            .attr("width", x.bandwidth())
-            .attr("height", function(d) { return height - y(d); })
+            .attr("transform", "translate(50,50)");
+        
+        /* Draw line */
+/* 
+        svg.select("g")
+          .append("path")
+          .datum(top_mon_vals)
+          .attr("fill", "none")
+          .attr("stroke", "blue")
+          .attr("d", line); */
+
+        /* data points */
+        svg.selectAll(".dot")
+          .data(top_mon_vals)
+          .enter().append("circle")
+            .attr("class", "dot")
+            .attr("cx", function(d,i) { return x(i) +20 + margin; })
+            .attr("cy", function(d,i) { return y(top_mon_vals[i])+margin; })
+            .attr("r", 10)
             .attr("fill", function(d, i) { return colors[i];})
             .on("mouseover", mouseover)
             .on("mousemove", mousemove)
@@ -250,19 +286,13 @@
 
         d3.select("svg").append("g")
           .attr("class", "x-axis")
-          .attr("transform", "translate(50,550)")
-          .call(d3.axisBottom(x).tickFormat(function (d, i) { return xlabels[i];}))
-          .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 9)
-            .attr("dy", ".35em")
-            .attr("transform", "rotate(90)")
-            .style("text-anchor","start")
+          .attr("transform", "translate(70,550)")
+          .call(d3.axisBottom(x).ticks(6).tickFormat(function (d, i) { return xlabels[i];}));
 
 
         /* Annotations */
         // Features of the annotation
-        const annotations = [
+/*         const annotations = [
           {
             note: {
               label: "Water types account for 112 of all Pokémon!",
@@ -287,7 +317,7 @@
         d3.select("svg")
           .append("g")
           .call(makeAnnotations);
-            
+             */
       </script>
     </body>
 
